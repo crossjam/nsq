@@ -14,7 +14,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	"unicode/utf8"
 
 	"github.com/bitly/nsq/nsqadmin/templates"
 	"github.com/bitly/nsq/util"
@@ -152,22 +151,33 @@ func (s *httpServer) staticAssetHandler(w http.ResponseWriter, req *http.Request
 	var urlRegex = regexp.MustCompile(`^/asset/(.+)$`)
 	matches := urlRegex.FindStringSubmatch(req.URL.Path)
 	if len(matches) == 0 {
-		http.Error(w, "INVALID_ASSET", 404)
+		log.Printf("ERROR:  No asset name for url - %s", req.URL.Path)
+		http.NotFound(w, req)
 		return
 	}
 	assetName := matches[1]
 	log.Printf("INFO: Requesting static asset - %s", assetName)
 
-	asset, failed := assets.Assets[assetName]
-	if failed {
-		log.Printf("No such asset - %s", assetName)
-		http.Error(w, "INVALID_ASSET", 404)
-	}
+	// asset, exists := assets.Assets[assetName]
+	// if ! exists {
+	// 	log.Printf("ERROR: No such asset - %s", assetName)
+	// 	http.NotFound(w, req)
+	// 	return
+	// }
 
-	assetLen := utf8.RuneCountInString(asset)
+	// assetLen := utf8.RuneCountInString(asset)
+
+	asset, error := assets.Asset(assetName)
+	if error != nil{
+		log.Printf("ERROR: asset access - %s : %s", assetName, error)
+		http.NotFound(w, req)
+		return
+	}
+	assetLen := len(asset)
 
 	w.Header().Set("Content-Length", fmt.Sprintf("%d", assetLen))
-	io.WriteString(w, asset)
+	w.Write(asset)
+	// io.Write(w, asset)
 }
 
 func (s *httpServer) indexHandler(w http.ResponseWriter, req *http.Request) {
