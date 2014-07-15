@@ -14,11 +14,13 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"unicode/utf8"
 
 	"github.com/bitly/nsq/nsqadmin/templates"
 	"github.com/bitly/nsq/util"
 	"github.com/bitly/nsq/util/lookupd"
 	"github.com/bitly/nsq/util/semver"
+	"github.com/crossjam/nsq/nsqadmin/assets"
 )
 
 var v1EndpointVersion *semver.Version
@@ -89,6 +91,9 @@ func (s *httpServer) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	} else if strings.HasPrefix(req.URL.Path, "/topic/") {
 		s.topicHandler(w, req)
 		return
+	} else if strings.HasPrefix(req.URL.Path, "/asset/") {
+	  	s.staticAssetHandler(w, req)
+		return
 	}
 
 	switch req.URL.Path {
@@ -141,6 +146,28 @@ func (s *httpServer) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 func (s *httpServer) pingHandler(w http.ResponseWriter, req *http.Request) {
 	w.Header().Set("Content-Length", "2")
 	io.WriteString(w, "OK")
+}
+
+func (s *httpServer) staticAssetHandler(w http.ResponseWriter, req *http.Request) {
+	var urlRegex = regexp.MustCompile(`^/asset/(.+)$`)
+	matches := urlRegex.FindStringSubmatch(req.URL.Path)
+	if len(matches) == 0 {
+		http.Error(w, "INVALID_ASSET", 404)
+		return
+	}
+	assetName := matches[1]
+	log.Printf("INFO: Requesting static asset - %s", assetName)
+
+	asset, failed := assets.Assets[assetName]
+	if failed {
+		log.Printf("No such asset - %s", assetName)
+		http.Error(w, "INVALID_ASSET", 404)
+	}
+
+	assetLen := utf8.RuneCountInString(asset)
+
+	w.Header().Set("Content-Length", fmt.Sprintf("%d", assetLen))
+	io.WriteString(w, asset)
 }
 
 func (s *httpServer) indexHandler(w http.ResponseWriter, req *http.Request) {
