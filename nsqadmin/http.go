@@ -18,8 +18,8 @@ import (
 	"github.com/bitly/nsq/util"
 	"github.com/bitly/nsq/util/lookupd"
 	"github.com/bitly/nsq/util/semver"
-	"github.com/crossjam/nsq/nsqadmin/assets"
-	"github.com/crossjam/nsq/nsqadmin/templates"
+	"github.com/bitly/nsq/nsqadmin/assets"
+	"github.com/bitly/nsq/nsqadmin/templates"
 )
 
 var v1EndpointVersion *semver.Version

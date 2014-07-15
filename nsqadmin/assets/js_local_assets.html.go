@@ -1,6 +1,6 @@
 package assets
 
-import "github.com/crossjam/nsq/nsqadmin/templates"
+import "github.com/bitly/nsq/nsqadmin/templates"
 
 func ReplaceJsHtmlTemplate() {
 
