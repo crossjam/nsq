@@ -18,7 +18,7 @@ type nsqadminOptions struct {
 	NSQDHTTPAddresses       []string `flag:"nsqd-http-address" cfg:"nsqd_http_addresses"`
 
 	NotificationHTTPEndpoint string `flag:"notification-http-endpoint"`
-	
+
 	UseEmbeddedAssets bool `flag:"use-embedded-assets"`
 }
 

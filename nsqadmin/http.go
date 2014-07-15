@@ -15,11 +15,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/crossjam/nsq/nsqadmin/assets"
-	"github.com/crossjam/nsq/nsqadmin/templates"
 	"github.com/bitly/nsq/util"
 	"github.com/bitly/nsq/util/lookupd"
 	"github.com/bitly/nsq/util/semver"
+	"github.com/crossjam/nsq/nsqadmin/assets"
+	"github.com/crossjam/nsq/nsqadmin/templates"
 )
 
 var v1EndpointVersion *semver.Version
@@ -71,7 +71,7 @@ func NewHTTPServer(context *Context) *httpServer {
 			return ""
 		},
 	})
-	
+
 	templates.Parse()
 
 	if context.nsqadmin.options.ProxyGraphite {
@@ -82,7 +82,6 @@ func NewHTTPServer(context *Context) *httpServer {
 		}
 		proxy = NewSingleHostReverseProxy(url, 20*time.Second)
 	}
-
 
 	return &httpServer{
 		context:  context,
@@ -99,7 +98,7 @@ func (s *httpServer) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		s.topicHandler(w, req)
 		return
 	} else if strings.HasPrefix(req.URL.Path, "/asset/") {
-	  	s.embeddedAssetHandler(w, req)
+		s.embeddedAssetHandler(w, req)
 		return
 	}
 
@@ -167,7 +166,7 @@ func (s *httpServer) embeddedAssetHandler(w http.ResponseWriter, req *http.Reque
 	log.Printf("INFO: Requesting embedded asset - %s", assetName)
 
 	asset, error := assets.Asset(assetName)
-	if error != nil{
+	if error != nil {
 		log.Printf("ERROR: embedded asset access - %s : %s", assetName, error)
 		http.NotFound(w, req)
 		return

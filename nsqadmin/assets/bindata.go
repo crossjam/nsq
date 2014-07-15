@@ -21684,20 +21684,21 @@ func AssetNames() []string {
 
 // _bindata is a table, holding each asset generator, mapped to its name.
 var _bindata = map[string]func() ([]byte, error){
-	"jquery-1.10.1.min.js": jquery_1_10_1_min_js,
-	"jquery-1.10.1.min.map": jquery_1_10_1_min_map,
-	"jquery-1.8.2.min.js": jquery_1_8_2_min_js,
-	"jquery.min.js": jquery_min_js,
-	"twitter-bootstrap/2.2.1/css/bootstrap-combined.min.css": twitter_bootstrap_2_2_1_css_bootstrap_combined_min_css,
-	"twitter-bootstrap/2.2.1/css/bootstrap-responsive.css": twitter_bootstrap_2_2_1_css_bootstrap_responsive_css,
-	"twitter-bootstrap/2.2.1/css/bootstrap-responsive.min.css": twitter_bootstrap_2_2_1_css_bootstrap_responsive_min_css,
-	"twitter-bootstrap/2.2.1/css/bootstrap.css": twitter_bootstrap_2_2_1_css_bootstrap_css,
-	"twitter-bootstrap/2.2.1/css/bootstrap.min.css": twitter_bootstrap_2_2_1_css_bootstrap_min_css,
+	"jquery-1.10.1.min.js":                                       jquery_1_10_1_min_js,
+	"jquery-1.10.1.min.map":                                      jquery_1_10_1_min_map,
+	"jquery-1.8.2.min.js":                                        jquery_1_8_2_min_js,
+	"jquery.min.js":                                              jquery_min_js,
+	"twitter-bootstrap/2.2.1/css/bootstrap-combined.min.css":     twitter_bootstrap_2_2_1_css_bootstrap_combined_min_css,
+	"twitter-bootstrap/2.2.1/css/bootstrap-responsive.css":       twitter_bootstrap_2_2_1_css_bootstrap_responsive_css,
+	"twitter-bootstrap/2.2.1/css/bootstrap-responsive.min.css":   twitter_bootstrap_2_2_1_css_bootstrap_responsive_min_css,
+	"twitter-bootstrap/2.2.1/css/bootstrap.css":                  twitter_bootstrap_2_2_1_css_bootstrap_css,
+	"twitter-bootstrap/2.2.1/css/bootstrap.min.css":              twitter_bootstrap_2_2_1_css_bootstrap_min_css,
 	"twitter-bootstrap/2.2.1/img/glyphicons-halflings-white.png": twitter_bootstrap_2_2_1_img_glyphicons_halflings_white_png,
-	"twitter-bootstrap/2.2.1/img/glyphicons-halflings.png": twitter_bootstrap_2_2_1_img_glyphicons_halflings_png,
-	"twitter-bootstrap/2.2.1/js/bootstrap.js": twitter_bootstrap_2_2_1_js_bootstrap_js,
-	"twitter-bootstrap/2.2.1/js/bootstrap.min.js": twitter_bootstrap_2_2_1_js_bootstrap_min_js,
+	"twitter-bootstrap/2.2.1/img/glyphicons-halflings.png":       twitter_bootstrap_2_2_1_img_glyphicons_halflings_png,
+	"twitter-bootstrap/2.2.1/js/bootstrap.js":                    twitter_bootstrap_2_2_1_js_bootstrap_js,
+	"twitter-bootstrap/2.2.1/js/bootstrap.min.js":                twitter_bootstrap_2_2_1_js_bootstrap_min_js,
 }
+
 // AssetDir returns the file names below a certain
 // directory embedded in the file by go-bindata.
 // For example if you run go-bindata on data/... and data contains the
@@ -21731,43 +21732,31 @@ func AssetDir(name string) ([]string, error) {
 }
 
 type _bintree_t struct {
-	Func func() ([]byte, error)
+	Func     func() ([]byte, error)
 	Children map[string]*_bintree_t
 }
+
 var _bintree = &_bintree_t{nil, map[string]*_bintree_t{
-	"jquery-1.10.1.min.js": &_bintree_t{jquery_1_10_1_min_js, map[string]*_bintree_t{
-	}},
-	"jquery-1.10.1.min.map": &_bintree_t{jquery_1_10_1_min_map, map[string]*_bintree_t{
-	}},
-	"jquery-1.8.2.min.js": &_bintree_t{jquery_1_8_2_min_js, map[string]*_bintree_t{
-	}},
-	"jquery.min.js": &_bintree_t{jquery_min_js, map[string]*_bintree_t{
-	}},
+	"jquery-1.10.1.min.js":  &_bintree_t{jquery_1_10_1_min_js, map[string]*_bintree_t{}},
+	"jquery-1.10.1.min.map": &_bintree_t{jquery_1_10_1_min_map, map[string]*_bintree_t{}},
+	"jquery-1.8.2.min.js":   &_bintree_t{jquery_1_8_2_min_js, map[string]*_bintree_t{}},
+	"jquery.min.js":         &_bintree_t{jquery_min_js, map[string]*_bintree_t{}},
 	"twitter-bootstrap": &_bintree_t{nil, map[string]*_bintree_t{
 		"2.2.1": &_bintree_t{nil, map[string]*_bintree_t{
 			"img": &_bintree_t{nil, map[string]*_bintree_t{
-				"glyphicons-halflings-white.png": &_bintree_t{twitter_bootstrap_2_2_1_img_glyphicons_halflings_white_png, map[string]*_bintree_t{
-				}},
-				"glyphicons-halflings.png": &_bintree_t{twitter_bootstrap_2_2_1_img_glyphicons_halflings_png, map[string]*_bintree_t{
-				}},
+				"glyphicons-halflings-white.png": &_bintree_t{twitter_bootstrap_2_2_1_img_glyphicons_halflings_white_png, map[string]*_bintree_t{}},
+				"glyphicons-halflings.png":       &_bintree_t{twitter_bootstrap_2_2_1_img_glyphicons_halflings_png, map[string]*_bintree_t{}},
 			}},
 			"js": &_bintree_t{nil, map[string]*_bintree_t{
-				"bootstrap.js": &_bintree_t{twitter_bootstrap_2_2_1_js_bootstrap_js, map[string]*_bintree_t{
-				}},
-				"bootstrap.min.js": &_bintree_t{twitter_bootstrap_2_2_1_js_bootstrap_min_js, map[string]*_bintree_t{
-				}},
+				"bootstrap.js":     &_bintree_t{twitter_bootstrap_2_2_1_js_bootstrap_js, map[string]*_bintree_t{}},
+				"bootstrap.min.js": &_bintree_t{twitter_bootstrap_2_2_1_js_bootstrap_min_js, map[string]*_bintree_t{}},
 			}},
 			"css": &_bintree_t{nil, map[string]*_bintree_t{
-				"bootstrap-responsive.css": &_bintree_t{twitter_bootstrap_2_2_1_css_bootstrap_responsive_css, map[string]*_bintree_t{
-				}},
-				"bootstrap-responsive.min.css": &_bintree_t{twitter_bootstrap_2_2_1_css_bootstrap_responsive_min_css, map[string]*_bintree_t{
-				}},
-				"bootstrap.css": &_bintree_t{twitter_bootstrap_2_2_1_css_bootstrap_css, map[string]*_bintree_t{
-				}},
-				"bootstrap.min.css": &_bintree_t{twitter_bootstrap_2_2_1_css_bootstrap_min_css, map[string]*_bintree_t{
-				}},
-				"bootstrap-combined.min.css": &_bintree_t{twitter_bootstrap_2_2_1_css_bootstrap_combined_min_css, map[string]*_bintree_t{
-				}},
+				"bootstrap-responsive.css":     &_bintree_t{twitter_bootstrap_2_2_1_css_bootstrap_responsive_css, map[string]*_bintree_t{}},
+				"bootstrap-responsive.min.css": &_bintree_t{twitter_bootstrap_2_2_1_css_bootstrap_responsive_min_css, map[string]*_bintree_t{}},
+				"bootstrap.css":                &_bintree_t{twitter_bootstrap_2_2_1_css_bootstrap_css, map[string]*_bintree_t{}},
+				"bootstrap.min.css":            &_bintree_t{twitter_bootstrap_2_2_1_css_bootstrap_min_css, map[string]*_bintree_t{}},
+				"bootstrap-combined.min.css":   &_bintree_t{twitter_bootstrap_2_2_1_css_bootstrap_combined_min_css, map[string]*_bintree_t{}},
 			}},
 		}},
 	}},
