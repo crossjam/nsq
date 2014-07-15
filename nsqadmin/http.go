@@ -15,11 +15,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/bitly/nsq/nsqadmin/templates"
+	"github.com/crossjam/nsq/nsqadmin/assets"
+	"github.com/crossjam/nsq/nsqadmin/templates"
 	"github.com/bitly/nsq/util"
 	"github.com/bitly/nsq/util/lookupd"
 	"github.com/bitly/nsq/util/semver"
-	"github.com/crossjam/nsq/nsqadmin/assets"
 )
 
 var v1EndpointVersion *semver.Version
@@ -53,6 +53,12 @@ type httpServer struct {
 func NewHTTPServer(context *Context) *httpServer {
 	var proxy *httputil.ReverseProxy
 
+	if context.nsqadmin.options.UseEmbeddedAssets {
+		log.Printf("INFO: replacing header and js templates with embedded asset versions.")
+		assets.ReplaceJsHtmlTemplate()
+		assets.ReplaceHeaderHtmlTemplate()
+	}
+
 	templates.T.Funcs(template.FuncMap{
 		"commafy":        util.Commafy,
 		"nanotohuman":    util.NanoSecondToHuman,
@@ -65,6 +71,7 @@ func NewHTTPServer(context *Context) *httpServer {
 			return ""
 		},
 	})
+	
 	templates.Parse()
 
 	if context.nsqadmin.options.ProxyGraphite {
@@ -75,6 +82,7 @@ func NewHTTPServer(context *Context) *httpServer {
 		}
 		proxy = NewSingleHostReverseProxy(url, 20*time.Second)
 	}
+
 
 	return &httpServer{
 		context:  context,
@@ -91,7 +99,7 @@ func (s *httpServer) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		s.topicHandler(w, req)
 		return
 	} else if strings.HasPrefix(req.URL.Path, "/asset/") {
-	  	s.staticAssetHandler(w, req)
+	  	s.embeddedAssetHandler(w, req)
 		return
 	}
 
@@ -147,34 +155,30 @@ func (s *httpServer) pingHandler(w http.ResponseWriter, req *http.Request) {
 	io.WriteString(w, "OK")
 }
 
-func (s *httpServer) staticAssetHandler(w http.ResponseWriter, req *http.Request) {
+func (s *httpServer) embeddedAssetHandler(w http.ResponseWriter, req *http.Request) {
 	var urlRegex = regexp.MustCompile(`^/asset/(.+)$`)
 	matches := urlRegex.FindStringSubmatch(req.URL.Path)
 	if len(matches) == 0 {
-		log.Printf("ERROR:  No asset name for url - %s", req.URL.Path)
+		log.Printf("ERROR:  No embedded asset name for url - %s", req.URL.Path)
 		http.NotFound(w, req)
 		return
 	}
 	assetName := matches[1]
-	log.Printf("INFO: Requesting static asset - %s", assetName)
-
-	// asset, exists := assets.Assets[assetName]
-	// if ! exists {
-	// 	log.Printf("ERROR: No such asset - %s", assetName)
-	// 	http.NotFound(w, req)
-	// 	return
-	// }
-
-	// assetLen := utf8.RuneCountInString(asset)
+	log.Printf("INFO: Requesting embedded asset - %s", assetName)
 
 	asset, error := assets.Asset(assetName)
 	if error != nil{
-		log.Printf("ERROR: asset access - %s : %s", assetName, error)
+		log.Printf("ERROR: embedded asset access - %s : %s", assetName, error)
 		http.NotFound(w, req)
 		return
 	}
 	assetLen := len(asset)
 
+	if strings.HasSuffix(assetName, ".js") {
+		w.Header().Set("Content-Type", "text/javascript")
+	} else if strings.HasSuffix(assetName, ".css") {
+		w.Header().Set("Content-Type", "text/css")
+	}
 	w.Header().Set("Content-Length", fmt.Sprintf("%d", assetLen))
 	w.Write(asset)
 	// io.Write(w, asset)

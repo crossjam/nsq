@@ -18,6 +18,8 @@ type nsqadminOptions struct {
 	NSQDHTTPAddresses       []string `flag:"nsqd-http-address" cfg:"nsqd_http_addresses"`
 
 	NotificationHTTPEndpoint string `flag:"notification-http-endpoint"`
+	
+	UseEmbeddedAssets bool `flag:"use-embedded-assets"`
 }
 
 func NewNSQAdminOptions() *nsqadminOptions {
@@ -26,5 +28,6 @@ func NewNSQAdminOptions() *nsqadminOptions {
 		UseStatsdPrefixes: true,
 		StatsdPrefix:      "nsq.%s",
 		StatsdInterval:    60 * time.Second,
+		UseEmbeddedAssets: false,
 	}
 }

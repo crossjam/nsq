@@ -32,6 +32,8 @@ var (
 
 	notificationHTTPEndpoint = flagSet.String("notification-http-endpoint", "", "HTTP endpoint (fully qualified) to which POST notifications of admin actions will be sent")
 
+	useEmbeddedAssets = flagSet.Bool("use-embedded-assets", false, "HTML generation uses js and css assets embedded into nsqadmin binary")
+
 	nsqlookupdHTTPAddresses = util.StringArray{}
 	nsqdHTTPAddresses       = util.StringArray{}
 )
