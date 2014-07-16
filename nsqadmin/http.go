@@ -100,7 +100,12 @@ func (s *httpServer) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		return
 	} else if strings.HasPrefix(req.URL.Path, "/asset/") {
 		if s.context.nsqadmin.options.UseEmbeddedAssets {
-			s.embeddedAssetHandler(w, req)
+			if req.Method != "GET" {
+				log.Printf("ERROR: invalid %s to GET only method", req.Method)
+				http.Error(w, "INVALID_REQUEST", 500)
+			} else {
+				s.embeddedAssetHandler(w, req)
+			}
 			return
 		} else {
 			log.Printf("ERROR: 404 %s", req.URL.Path)
