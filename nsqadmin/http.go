@@ -91,6 +91,7 @@ func NewHTTPServer(context *Context) *httpServer {
 }
 
 func (s *httpServer) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+		
 	if strings.HasPrefix(req.URL.Path, "/node/") {
 		s.nodeHandler(w, req)
 		return
@@ -98,8 +99,14 @@ func (s *httpServer) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		s.topicHandler(w, req)
 		return
 	} else if strings.HasPrefix(req.URL.Path, "/asset/") {
-		s.embeddedAssetHandler(w, req)
-		return
+		if s.context.nsqadmin.options.UseEmbeddedAssets {
+			s.embeddedAssetHandler(w, req)
+			return
+		} else {
+			log.Printf("ERROR: 404 %s", req.URL.Path)
+			http.NotFound(w, req)
+			return
+		}
 	}
 
 	switch req.URL.Path {
