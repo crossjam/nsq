@@ -19,7 +19,6 @@ type nsqadminOptions struct {
 
 	NotificationHTTPEndpoint string `flag:"notification-http-endpoint"`
 
-	UseEmbeddedAssets bool `flag:"use-embedded-assets"`
 }
 
 func NewNSQAdminOptions() *nsqadminOptions {

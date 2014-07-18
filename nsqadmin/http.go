@@ -18,7 +18,6 @@ import (
 	"github.com/bitly/nsq/util"
 	"github.com/bitly/nsq/util/lookupd"
 	"github.com/bitly/nsq/util/semver"
-	"github.com/bitly/nsq/nsqadmin/assets"
 	"github.com/bitly/nsq/nsqadmin/templates"
 )
 
@@ -52,12 +51,6 @@ type httpServer struct {
 
 func NewHTTPServer(context *Context) *httpServer {
 	var proxy *httputil.ReverseProxy
-
-	if context.nsqadmin.options.UseEmbeddedAssets {
-		log.Printf("INFO: replacing header and js templates with embedded asset versions.")
-		assets.ReplaceJsHtmlTemplate()
-		assets.ReplaceHeaderHtmlTemplate()
-	}
 
 	templates.T.Funcs(template.FuncMap{
 		"commafy":        util.Commafy,
@@ -99,19 +92,13 @@ func (s *httpServer) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		s.topicHandler(w, req)
 		return
 	} else if strings.HasPrefix(req.URL.Path, "/static/") {
-		if s.context.nsqadmin.options.UseEmbeddedAssets {
-			if req.Method != "GET" {
-				log.Printf("ERROR: invalid %s to GET only method", req.Method)
-				http.Error(w, "INVALID_REQUEST", 500)
-			} else {
-				s.embeddedAssetHandler(w, req)
-			}
-			return
+		if req.Method != "GET" {
+			log.Printf("ERROR: invalid %s to GET only method", req.Method)
+			http.Error(w, "INVALID_REQUEST", 500)
 		} else {
-			log.Printf("ERROR: 404 %s", req.URL.Path)
-			http.NotFound(w, req)
-			return
+			s.embeddedAssetHandler(w, req)
 		}
+		return
 	}
 
 	switch req.URL.Path {
@@ -177,7 +164,7 @@ func (s *httpServer) embeddedAssetHandler(w http.ResponseWriter, req *http.Reque
 	assetName := matches[1]
 	log.Printf("INFO: Requesting embedded asset - %s", assetName)
 
-	asset, error := assets.Asset(assetName)
+	asset, error := templates.Asset(assetName)
 	if error != nil {
 		log.Printf("ERROR: embedded asset access - %s : %s", assetName, error)
 		http.NotFound(w, req)
