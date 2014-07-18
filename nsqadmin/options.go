@@ -28,6 +28,5 @@ func NewNSQAdminOptions() *nsqadminOptions {
 		UseStatsdPrefixes: true,
 		StatsdPrefix:      "nsq.%s",
 		StatsdInterval:    60 * time.Second,
-		UseEmbeddedAssets: false,
 	}
 }

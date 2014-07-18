@@ -98,7 +98,7 @@ func (s *httpServer) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	} else if strings.HasPrefix(req.URL.Path, "/topic/") {
 		s.topicHandler(w, req)
 		return
-	} else if strings.HasPrefix(req.URL.Path, "/asset/") {
+	} else if strings.HasPrefix(req.URL.Path, "/static/") {
 		if s.context.nsqadmin.options.UseEmbeddedAssets {
 			if req.Method != "GET" {
 				log.Printf("ERROR: invalid %s to GET only method", req.Method)
@@ -167,7 +167,7 @@ func (s *httpServer) pingHandler(w http.ResponseWriter, req *http.Request) {
 }
 
 func (s *httpServer) embeddedAssetHandler(w http.ResponseWriter, req *http.Request) {
-	var urlRegex = regexp.MustCompile(`^/asset/(.+)$`)
+	var urlRegex = regexp.MustCompile(`^/static/(.+)$`)
 	matches := urlRegex.FindStringSubmatch(req.URL.Path)
 	if len(matches) == 0 {
 		log.Printf("ERROR:  No embedded asset name for url - %s", req.URL.Path)
@@ -192,7 +192,6 @@ func (s *httpServer) embeddedAssetHandler(w http.ResponseWriter, req *http.Reque
 	}
 	w.Header().Set("Content-Length", fmt.Sprintf("%d", assetLen))
 	w.Write(asset)
-	// io.Write(w, asset)
 }
 
 func (s *httpServer) indexHandler(w http.ResponseWriter, req *http.Request) {
