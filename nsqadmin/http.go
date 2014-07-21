@@ -84,7 +84,7 @@ func NewHTTPServer(context *Context) *httpServer {
 }
 
 func (s *httpServer) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-		
+
 	if strings.HasPrefix(req.URL.Path, "/node/") {
 		s.nodeHandler(w, req)
 		return
