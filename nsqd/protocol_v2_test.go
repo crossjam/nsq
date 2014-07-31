@@ -204,7 +204,7 @@ func TestClientTimeout(t *testing.T) {
 	topicName := "test_client_timeout_v2" + strconv.Itoa(int(time.Now().Unix()))
 
 	options := NewNSQDOptions()
-	options.ClientTimeout = 50 * time.Millisecond
+	options.ClientTimeout = 150 * time.Millisecond
 	options.Verbose = true
 	tcpAddr, _, nsqd := mustStartNSQD(options)
 	defer nsqd.Exit()
@@ -215,7 +215,7 @@ func TestClientTimeout(t *testing.T) {
 	identify(t, conn, nil, frameTypeResponse)
 	sub(t, conn, topicName, "ch")
 
-	time.Sleep(50 * time.Millisecond)
+	time.Sleep(150 * time.Millisecond)
 
 	// depending on timing there may be 1 or 2 hearbeats sent
 	// just read until we get an error
@@ -550,7 +550,7 @@ func TestTouch(t *testing.T) {
 
 	options := NewNSQDOptions()
 	options.Verbose = true
-	options.MsgTimeout = 50 * time.Millisecond
+	options.MsgTimeout = 150 * time.Millisecond
 	tcpAddr, _, nsqd := mustStartNSQD(options)
 	defer nsqd.Exit()
 
@@ -577,12 +577,12 @@ func TestTouch(t *testing.T) {
 	assert.Equal(t, frameType, frameTypeMessage)
 	assert.Equal(t, msgOut.ID, msg.ID)
 
-	time.Sleep(25 * time.Millisecond)
+	time.Sleep(75 * time.Millisecond)
 
 	_, err = nsq.Touch(nsq.MessageID(msg.ID)).WriteTo(conn)
 	assert.Equal(t, err, nil)
 
-	time.Sleep(30 * time.Millisecond)
+	time.Sleep(75 * time.Millisecond)
 
 	_, err = nsq.Finish(nsq.MessageID(msg.ID)).WriteTo(conn)
 	assert.Equal(t, err, nil)
@@ -1373,8 +1373,9 @@ func BenchmarkProtocolV2Exec(b *testing.B) {
 	b.StopTimer()
 	log.SetOutput(ioutil.Discard)
 	defer log.SetOutput(os.Stdout)
-	p := &protocolV2{}
-	c := newClientV2(0, nil, nil)
+	ctx := &context{NewNSQD(NewNSQDOptions())}
+	p := &protocolV2{ctx}
+	c := newClientV2(0, nil, ctx)
 	params := [][]byte{[]byte("NOP")}
 	b.StartTimer()
 
