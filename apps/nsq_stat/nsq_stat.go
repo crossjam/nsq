@@ -48,14 +48,14 @@ func statLoop(interval time.Duration, topic string, channel string,
 		}
 		log.SetOutput(os.Stdout)
 		if err != nil {
-			log.Fatalf("ERROR: failed to get topic producers - %s", err.Error())
+			log.Fatalf("ERROR: failed to get topic producers - %s", err)
 		}
 
 		log.SetOutput(ioutil.Discard)
 		_, allChannelStats, err := lookupd.GetNSQDStats(producers, topic)
 		log.SetOutput(os.Stdout)
 		if err != nil {
-			log.Fatalf("ERROR: failed to get nsqd stats - %s", err.Error())
+			log.Fatalf("ERROR: failed to get nsqd stats - %s", err)
 		}
 
 		c, ok := allChannelStats[channel]
@@ -65,7 +65,7 @@ func statLoop(interval time.Duration, topic string, channel string,
 
 		if i%25 == 0 {
 			fmt.Printf("---------------depth---------------+--------------metadata---------------\n")
-			fmt.Printf("%7d %7s %7s %5s %5s | %7s %7s %12s %7s\n", "total", "mem", "disk", "inflt", "def", "req", "t-o", "msgs", "clients")
+			fmt.Printf("%7s %7s %7s %5s %5s | %7s %7s %12s %7s\n", "total", "mem", "disk", "inflt", "def", "req", "t-o", "msgs", "clients")
 		}
 
 		// TODO: paused
@@ -104,22 +104,22 @@ func main() {
 	}
 
 	if *topic == "" || *channel == "" {
-		log.Fatalf("ERROR: --topic and --channel are required")
+		log.Fatal("--topic and --channel are required")
 	}
 
 	if len(nsqdHTTPAddrs) == 0 && len(lookupdHTTPAddrs) == 0 {
-		log.Fatalf("ERROR: --nsqd-http-address or --lookupd-http-address required")
+		log.Fatal("--nsqd-http-address or --lookupd-http-address required")
 	}
 	if len(nsqdHTTPAddrs) > 0 && len(lookupdHTTPAddrs) > 0 {
-		log.Fatalf("ERROR: use --nsqd-http-address or --lookupd-http-address not both")
+		log.Fatal("use --nsqd-http-address or --lookupd-http-address not both")
 	}
 
 	if err := checkAddrs(nsqdHTTPAddrs); err != nil {
-		log.Fatalf("ERROR: --nsqd-http-address error - %s", err.Error())
+		log.Fatalf("--nsqd-http-address error - %s", err)
 	}
 
 	if err := checkAddrs(lookupdHTTPAddrs); err != nil {
-		log.Fatalf("ERROR: --lookupd-http-address error - %s", err.Error())
+		log.Fatalf("--lookupd-http-address error - %s", err)
 	}
 
 	termChan := make(chan os.Signal, 1)
