@@ -3,6 +3,7 @@ package nsqd
 import (
 	"bytes"
 	"errors"
+	"strings"
 	"sync"
 	"sync/atomic"
 
@@ -24,6 +25,10 @@ type Topic struct {
 	waitGroup         util.WaitGroupWrapper
 	exitFlag          int32
 
+	ephemeral      bool
+	deleteCallback func(*Topic)
+	deleter        sync.Once
+
 	paused    int32
 	pauseChan chan bool
 
@@ -31,28 +36,33 @@ type Topic struct {
 }
 
 // Topic constructor
-func NewTopic(topicName string, ctx *context) *Topic {
-	diskQueue := newDiskQueue(topicName,
-		ctx.nsqd.opts.DataPath,
-		ctx.nsqd.opts.MaxBytesPerFile,
-		ctx.nsqd.opts.SyncEvery,
-		ctx.nsqd.opts.SyncTimeout,
-		ctx.nsqd.opts.Logger)
-
+func NewTopic(topicName string, ctx *context, deleteCallback func(*Topic)) *Topic {
 	t := &Topic{
 		name:              topicName,
 		channelMap:        make(map[string]*Channel),
-		backend:           diskQueue,
 		memoryMsgChan:     make(chan *Message, ctx.nsqd.opts.MemQueueSize),
 		exitChan:          make(chan int),
 		channelUpdateChan: make(chan int),
 		ctx:               ctx,
 		pauseChan:         make(chan bool),
+		deleteCallback:    deleteCallback,
+	}
+
+	if strings.HasSuffix(topicName, "#ephemeral") {
+		t.ephemeral = true
+		t.backend = newDummyBackendQueue()
+	} else {
+		t.backend = newDiskQueue(topicName,
+			ctx.nsqd.opts.DataPath,
+			ctx.nsqd.opts.MaxBytesPerFile,
+			ctx.nsqd.opts.SyncEvery,
+			ctx.nsqd.opts.SyncTimeout,
+			ctx.nsqd.opts.Logger)
 	}
 
 	t.waitGroup.Wrap(func() { t.messagePump() })
 
-	go t.ctx.nsqd.Notify(t)
+	t.ctx.nsqd.Notify(t)
 
 	return t
 }
@@ -116,6 +126,7 @@ func (t *Topic) DeleteExistingChannel(channelName string) error {
 	}
 	delete(t.channelMap, channelName)
 	// not defered so that we can continue while the channel async closes
+	numChannels := len(t.channelMap)
 	t.Unlock()
 
 	t.ctx.nsqd.logf("TOPIC(%s): deleting channel %s", t.name, channel.name)
@@ -128,6 +139,10 @@ func (t *Topic) DeleteExistingChannel(channelName string) error {
 	select {
 	case t.channelUpdateChan <- 1:
 	case <-t.exitChan:
+	}
+
+	if numChannels == 0 && t.ephemeral == true {
+		go t.deleter.Do(func() { t.deleteCallback(t) })
 	}
 
 	return nil
@@ -288,7 +303,7 @@ func (t *Topic) exit(deleted bool) error {
 
 		// since we are explicitly deleting a topic (not just at system exit time)
 		// de-register this from the lookupd
-		go t.ctx.nsqd.Notify(t)
+		t.ctx.nsqd.Notify(t)
 	} else {
 		t.ctx.nsqd.logf("TOPIC(%s): closing", t.name)
 	}

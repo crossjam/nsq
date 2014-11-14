@@ -110,7 +110,7 @@ func TestChannelTopicNames(t *testing.T) {
 	equal(t, util.IsValidChannelName("test#ephemeral"), true)
 	equal(t, util.IsValidTopicName("test"), true)
 	equal(t, util.IsValidTopicName("test-with_period."), true)
-	equal(t, util.IsValidTopicName("test#ephemeral"), false)
+	equal(t, util.IsValidTopicName("test#ephemeral"), true)
 	equal(t, util.IsValidTopicName("test:ephemeral"), false)
 }
 
@@ -1269,6 +1269,9 @@ func TestClientMsgTimeout(t *testing.T) {
 	msgOut, err := decodeMessage(data)
 	equal(t, msgOut.ID, msg.ID)
 	equal(t, msgOut.Body, msg.Body)
+
+	_, err = nsq.Ready(0).WriteTo(conn)
+	equal(t, err, nil)
 
 	time.Sleep(1100 * time.Millisecond)
 

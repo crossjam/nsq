@@ -55,11 +55,11 @@ type Channel struct {
 	exitFlag      int32
 
 	// state tracking
-	clients          map[int64]Consumer
-	paused           int32
-	ephemeralChannel bool
-	deleteCallback   func(*Channel)
-	deleter          sync.Once
+	clients        map[int64]Consumer
+	paused         int32
+	ephemeral      bool
+	deleteCallback func(*Channel)
+	deleter        sync.Once
 
 	// Stats tracking
 	e2eProcessingLatencyStream *util.Quantile
@@ -100,7 +100,7 @@ func NewChannel(topicName string, channelName string, ctx *context,
 	c.initPQ()
 
 	if strings.HasSuffix(channelName, "#ephemeral") {
-		c.ephemeralChannel = true
+		c.ephemeral = true
 		c.backend = newDummyBackendQueue()
 	} else {
 		// backend names, for uniqueness, automatically include the topic...
@@ -118,7 +118,7 @@ func NewChannel(topicName string, channelName string, ctx *context,
 	c.waitGroup.Wrap(func() { c.deferredWorker() })
 	c.waitGroup.Wrap(func() { c.inFlightWorker() })
 
-	go c.ctx.nsqd.Notify(c)
+	c.ctx.nsqd.Notify(c)
 
 	return c
 }
@@ -163,7 +163,7 @@ func (c *Channel) exit(deleted bool) error {
 
 		// since we are explicitly deleting a channel (not just at system exit time)
 		// de-register this from the lookupd
-		go c.ctx.nsqd.Notify(c)
+		c.ctx.nsqd.Notify(c)
 	} else {
 		c.ctx.nsqd.logf("CHANNEL(%s): closing", c.name)
 	}
@@ -421,7 +421,7 @@ func (c *Channel) RemoveClient(clientID int64) {
 	}
 	delete(c.clients, clientID)
 
-	if len(c.clients) == 0 && c.ephemeralChannel == true {
+	if len(c.clients) == 0 && c.ephemeral == true {
 		go c.deleter.Do(func() { c.deleteCallback(c) })
 	}
 }

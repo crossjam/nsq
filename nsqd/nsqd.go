@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"math/rand"
 	"net"
 	"os"
 	"path"
@@ -303,7 +304,7 @@ func (n *NSQD) PersistMetadata() error {
 		topic.Lock()
 		for _, channel := range topic.channelMap {
 			channel.Lock()
-			if !channel.ephemeralChannel {
+			if !channel.ephemeral {
 				channelData := make(map[string]interface{})
 				channelData["name"] = channel.name
 				channelData["paused"] = channel.IsPaused()
@@ -323,7 +324,7 @@ func (n *NSQD) PersistMetadata() error {
 		return err
 	}
 
-	tmpFileName := fileName + ".tmp"
+	tmpFileName := fmt.Sprintf("%s.%d.tmp", fileName, rand.Int())
 	f, err := os.OpenFile(tmpFileName, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
 	if err != nil {
 		return err
@@ -384,7 +385,10 @@ func (n *NSQD) GetTopic(topicName string) *Topic {
 		n.Unlock()
 		return t
 	} else {
-		t = NewTopic(topicName, &context{n})
+		deleteCallback := func(t *Topic) {
+			n.DeleteExistingTopic(t.name)
+		}
+		t = NewTopic(topicName, &context{n}, deleteCallback)
 		n.topicMap[topicName] = t
 
 		n.logf("TOPIC(%s): created", t.name)
@@ -480,18 +484,20 @@ exit:
 }
 
 func (n *NSQD) Notify(v interface{}) {
-	// by selecting on exitChan we guarantee that
-	// we do not block exit, see issue #123
-	select {
-	case <-n.exitChan:
-	case n.notifyChan <- v:
-		n.Lock()
-		err := n.PersistMetadata()
-		if err != nil {
-			n.logf("ERROR: failed to persist metadata - %s", err)
+	n.waitGroup.Wrap(func() {
+		// by selecting on exitChan we guarantee that
+		// we do not block exit, see issue #123
+		select {
+		case <-n.exitChan:
+		case n.notifyChan <- v:
+			n.Lock()
+			err := n.PersistMetadata()
+			if err != nil {
+				n.logf("ERROR: failed to persist metadata - %s", err)
+			}
+			n.Unlock()
 		}
-		n.Unlock()
-	}
+	})
 }
 
 func buildTLSConfig(opts *nsqdOptions) (*tls.Config, error) {
